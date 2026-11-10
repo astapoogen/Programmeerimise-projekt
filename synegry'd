@@ -1,0 +1,35 @@
+{
+        "items": ["Brimstone", "Tammy's Head"],
+        "name": "Brimstone + Tammy's Head",
+        "details": "Tammy's Head'i kasutamine tekitab Brimstone'i kiirtega seotud tugeva rünnaku."
+    },
+    {
+        "items": ["Brimstone", "Spoon Bender"],
+        "name": "Brimstone + Spoon Bender",
+        "details": "Brimstone'i kiired saavad sihtiva omaduse."
+    },
+    {
+        "items": ["Brimstone", "Technology"],
+        "name": "Brimstone + Technology",
+        "details": "Need laser-esemed muudavad koos pisarate/laserite ründemehaanikat."
+    },
+    {
+        "items": ["Mom's Knife", "Spoon Bender"],
+        "name": "Mom's Knife + Spoon Bender",
+        "details": "Nuga saab sihtiva omaduse."
+    },
+    {
+        "items": ["Technology", "Spoon Bender"],
+        "name": "Technology + Spoon Bender",
+        "details": "Laser saab sihtiva omaduse."
+    },
+    {
+        "items": ["Polyphemus", "Spoon Bender"],
+        "name": "Polyphemus + Spoon Bender",
+        "details": "Suurte pisarate puhul lisandub sihtimise eelis."
+    },
+    {
+        "items": ["Cricket's Body", "Rubber Cement"],
+        "name": "Cricket's Body + Rubber Cement",
+        "details": "Põrkuvad pisarad ja jagunemine võivad koos tekitada rohkem tabamusi."
+    }
