@@ -1,0 +1,186 @@
+"Brimstone": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["laser", "damage", "charge", "tears"],
+        "description": "Asendab pisarad laetava verekiirega."
+    },
+    "Mom's Knife": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["knife", "damage", "projectile"],
+        "description": "Annab mängijale visatava ja laetava noa."
+    },
+    "Technology": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["laser", "damage", "tears"],
+        "description": "Lisab pideva laserkiire."
+    },
+    "Spoon Bender": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["homing", "tears", "projectile"],
+        "description": "Annab pisaratele sihtiva omaduse."
+    },
+    "Polyphemus": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["damage", "tears", "slow_tears"],
+        "description": "Suurendab oluliselt kahju, kuid aeglustab pisarate laskmist."
+    },
+    "Sacred Heart": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["damage", "homing", "tears"],
+        "description": "Suurendab kahju ja annab pisaratele sihtimise."
+    },
+    "Cricket's Head": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["damage", "tears"],
+        "description": "Suurendab kahju ja pisarate efektiivsust."
+    },
+    "Magic Mushroom": {
+        "type": "statistika",
+        "quality": 4,
+        "tags": ["damage", "health", "speed"],
+        "description": "Parandab mitut mängija omadust."
+    },
+    "Pentagram": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["damage"],
+        "description": "Suurendab kahju."
+    },
+    "The Halo": {
+        "type": "statistika",
+        "quality": 3,
+        "tags": ["damage", "tears", "range", "speed", "health"],
+        "description": "Parandab mitut põhilist omadust."
+    },
+    "Inner Eye": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "triple_shot"],
+        "description": "Võimaldab tulistada kolm pisarat korraga, kuid vähendab laskekiirust."
+    },
+    "Mutant Spider": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "quad_shot"],
+        "description": "Võimaldab tulistada neli pisarat korraga, kuid vähendab laskekiirust."
+    },
+    "Tammy's Head": {
+        "type": "aktiivne",
+        "quality": 3,
+        "tags": ["tears", "burst", "active"],
+        "description": "Laseb kasutamisel korraga pisarate ringi."
+    },
+    "Proptosis": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["damage", "tears", "range"],
+        "description": "Suurendab lähedalt tehtavat kahju; kahju väheneb kaugusega."
+    },
+    "Death's Touch": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["damage", "piercing", "tears"],
+        "description": "Suurendab kahju ja annab pisaratele läbistava omaduse."
+    },
+    "Ouija Board": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["spectral", "tears"],
+        "description": "Annab pisaratele spektraalse omaduse."
+    },
+    "Capricorn": {
+        "type": "statistika",
+        "quality": 3,
+        "tags": ["damage", "tears", "range", "speed", "health"],
+        "description": "Parandab mitut mängija omadust."
+    },
+    "PHD": {
+        "type": "passiivne",
+        "quality": 3,
+        "tags": ["health", "pills", "utility"],
+        "description": "Parandab pillide mõju ja muudab nende tuvastamise lihtsamaks."
+    },
+    "The Pact": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["damage", "tears", "health"],
+        "description": "Suurendab kahju ja laskekiirust; maksab tervist."
+    },
+    "Growth Hormones": {
+        "type": "statistika",
+        "quality": 3,
+        "tags": ["damage", "speed"],
+        "description": "Suurendab kahju ja liikumiskiirust."
+    },
+    "Speed Ball": {
+        "type": "statistika",
+        "quality": 2,
+        "tags": ["speed", "shot_speed"],
+        "description": "Suurendab liikumis- ja lasu kiirust."
+    },
+    "Roid Rage": {
+        "type": "statistika",
+        "quality": 2,
+        "tags": ["speed", "range"],
+        "description": "Suurendab liikumiskiirust ja pisarate ulatust."
+    },
+    "Toothpicks": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["tears", "shot_speed"],
+        "description": "Suurendab laskekiirust ja lasu kiirust."
+    },
+    "Cricket's Body": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "split", "damage"],
+        "description": "Pisarad jagunevad kokkupõrkel väiksemateks pisarateks."
+    },
+    "Loki's Horns": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["tears", "multi_direction"],
+        "description": "Annab võimaluse tulistada pisaraid mitmes suunas."
+    },
+    "Rubber Cement": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "bounce", "projectile"],
+        "description": "Pisarad põrkuvad pindadelt tagasi."
+    },
+    "The Common Cold": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["tears", "poison"],
+        "description": "Annab pisaratele mürgitava efekti."
+    },
+    "Anarchist Cookbook": {
+        "type": "aktiivne",
+        "quality": 1,
+        "tags": ["explosive", "active"],
+        "description": "Tekitab ruumi juhuslikesse kohtadesse pomme."
+    },
+    "Book of Belial": {
+        "type": "aktiivne",
+        "quality": 3,
+        "tags": ["damage", "active", "temporary_buff"],
+        "description": "Annab kasutamisel ajutise kahjuboonuse."
+    },
+    "The Bible": {
+        "type": "aktiivne",
+        "quality": 2,
+        "tags": ["active", "utility", "flight"],
+        "description": "Annab ajutise lendamisvõime ning mõjub teatud bossidele eriliselt."
+    },
+    "The D6": {
+        "type": "aktiivne",
+        "quality": 4,
+        "tags": ["active", "reroll", "utility"],
+        "description": "Võimaldab ruumi esemeid ümber veeretada."
+    }
