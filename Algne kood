@@ -1,0 +1,703 @@
+"""
+The Binding of Isaac: Rebirth – Synergy Finder & Item Advisor
+
+Kirjeldus:
+    Lihtne graafilise kasutajaliidesega abiprogramm The Binding of Isaac:
+    Rebirthi põhimängu esemete uurimiseks. Programm võimaldab otsida esemete
+    vahel teadaolevaid sünergiaid ning saada praeguse build'i põhjal
+    lihtsustatud soovitusi.
+
+Märkus andmete kohta:
+    Kaasas on väike käsitsi koostatud näidisandmestik Rebirthi põhimängu
+    esemetest (DLC-esemeid ei ole lisatud). Sünergiaandmed ei ole täielik
+    mängu simulatsioon ega ammendav nimekiri kõigist võimalikest
+    kombinatsioonidest. Soovituste skoor on programmi enda lihtsustatud
+    hinnang, mitte mängu tegeliku võiduvõimaluse ennustus.
+
+Allikad:
+    isaacguru.com
+"""
+
+import json
+import tkinter as tk
+from pathlib import Path
+from tkinter import messagebox, ttk
+from typing import TypedDict
+
+
+DATA_FILE = Path(__file__).with_name("isaac_user_data.json")
+
+class ItemData(TypedDict):
+    type: str
+    quality: int
+    tags: list[str]
+    description: str
+
+
+class SynergyData(TypedDict):
+    items: list[str]
+    name: str
+    details: str
+
+# Esemete omadused on lihtsustatud märksõnad, mida programm kasutab
+# sünergiate leidmisel ja soovituste järjestamisel.
+
+ITEMS: dict[str, ItemData] = {
+    "Brimstone": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["laser", "damage", "charge", "tears"],
+        "description": "Asendab pisarad laetava verekiirega."
+    },
+    "Mom's Knife": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["knife", "damage", "projectile"],
+        "description": "Annab mängijale visatava ja laetava noa."
+    },
+    "Technology": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["laser", "damage", "tears"],
+        "description": "Lisab pideva laserkiire."
+    },
+    "Spoon Bender": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["homing", "tears", "projectile"],
+        "description": "Annab pisaratele sihtiva omaduse."
+    },
+    "Polyphemus": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["damage", "tears", "slow_tears"],
+        "description": "Suurendab oluliselt kahju, kuid aeglustab pisarate laskmist."
+    },
+    "Sacred Heart": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["damage", "homing", "tears"],
+        "description": "Suurendab kahju ja annab pisaratele sihtimise."
+    },
+    "Cricket's Head": {
+        "type": "ründav",
+        "quality": 4,
+        "tags": ["damage", "tears"],
+        "description": "Suurendab kahju ja pisarate efektiivsust."
+    },
+    "Magic Mushroom": {
+        "type": "statistika",
+        "quality": 4,
+        "tags": ["damage", "health", "speed"],
+        "description": "Parandab mitut mängija omadust."
+    },
+    "Pentagram": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["damage"],
+        "description": "Suurendab kahju."
+    },
+    "The Halo": {
+        "type": "statistika",
+        "quality": 3,
+        "tags": ["damage", "tears", "range", "speed", "health"],
+        "description": "Parandab mitut põhilist omadust."
+    },
+    "Inner Eye": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "triple_shot"],
+        "description": "Võimaldab tulistada kolm pisarat korraga, kuid vähendab laskekiirust."
+    },
+    "Mutant Spider": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "quad_shot"],
+        "description": "Võimaldab tulistada neli pisarat korraga, kuid vähendab laskekiirust."
+    },
+    "Tammy's Head": {
+        "type": "aktiivne",
+        "quality": 3,
+        "tags": ["tears", "burst", "active"],
+        "description": "Laseb kasutamisel korraga pisarate ringi."
+    },
+    "Proptosis": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["damage", "tears", "range"],
+        "description": "Suurendab lähedalt tehtavat kahju; kahju väheneb kaugusega."
+    },
+    "Death's Touch": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["damage", "piercing", "tears"],
+        "description": "Suurendab kahju ja annab pisaratele läbistava omaduse."
+    },
+    "Ouija Board": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["spectral", "tears"],
+        "description": "Annab pisaratele spektraalse omaduse."
+    },
+    "Capricorn": {
+        "type": "statistika",
+        "quality": 3,
+        "tags": ["damage", "tears", "range", "speed", "health"],
+        "description": "Parandab mitut mängija omadust."
+    },
+    "PHD": {
+        "type": "passiivne",
+        "quality": 3,
+        "tags": ["health", "pills", "utility"],
+        "description": "Parandab pillide mõju ja muudab nende tuvastamise lihtsamaks."
+    },
+    "The Pact": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["damage", "tears", "health"],
+        "description": "Suurendab kahju ja laskekiirust; maksab tervist."
+    },
+    "Growth Hormones": {
+        "type": "statistika",
+        "quality": 3,
+        "tags": ["damage", "speed"],
+        "description": "Suurendab kahju ja liikumiskiirust."
+    },
+    "Speed Ball": {
+        "type": "statistika",
+        "quality": 2,
+        "tags": ["speed", "shot_speed"],
+        "description": "Suurendab liikumis- ja lasu kiirust."
+    },
+    "Roid Rage": {
+        "type": "statistika",
+        "quality": 2,
+        "tags": ["speed", "range"],
+        "description": "Suurendab liikumiskiirust ja pisarate ulatust."
+    },
+    "Toothpicks": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["tears", "shot_speed"],
+        "description": "Suurendab laskekiirust ja lasu kiirust."
+    },
+    "Cricket's Body": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "split", "damage"],
+        "description": "Pisarad jagunevad kokkupõrkel väiksemateks pisarateks."
+    },
+    "Loki's Horns": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["tears", "multi_direction"],
+        "description": "Annab võimaluse tulistada pisaraid mitmes suunas."
+    },
+    "Rubber Cement": {
+        "type": "ründav",
+        "quality": 3,
+        "tags": ["tears", "bounce", "projectile"],
+        "description": "Pisarad põrkuvad pindadelt tagasi."
+    },
+    "The Common Cold": {
+        "type": "ründav",
+        "quality": 2,
+        "tags": ["tears", "poison"],
+        "description": "Annab pisaratele mürgitava efekti."
+    },
+    "Anarchist Cookbook": {
+        "type": "aktiivne",
+        "quality": 1,
+        "tags": ["explosive", "active"],
+        "description": "Tekitab ruumi juhuslikesse kohtadesse pomme."
+    },
+    "Book of Belial": {
+        "type": "aktiivne",
+        "quality": 3,
+        "tags": ["damage", "active", "temporary_buff"],
+        "description": "Annab kasutamisel ajutise kahjuboonuse."
+    },
+    "The Bible": {
+        "type": "aktiivne",
+        "quality": 2,
+        "tags": ["active", "utility", "flight"],
+        "description": "Annab ajutise lendamisvõime ning mõjub teatud bossidele eriliselt."
+    },
+    "The D6": {
+        "type": "aktiivne",
+        "quality": 4,
+        "tags": ["active", "reroll", "utility"],
+        "description": "Võimaldab ruumi esemeid ümber veeretada."
+    },
+}
+
+
+# Need on käsitsi lisatud konkreetsed näited, mitte täielik sünergiate loend.
+# Märkmete abil saab andmestikku projekti käigus täiendada.
+KNOWN_SYNERGIES: list[SynergyData] = [
+    {
+        "items": ["Brimstone", "Tammy's Head"],
+        "name": "Brimstone + Tammy's Head",
+        "details": "Tammy's Head'i kasutamine tekitab Brimstone'i kiirtega seotud tugeva rünnaku."
+    },
+    {
+        "items": ["Brimstone", "Spoon Bender"],
+        "name": "Brimstone + Spoon Bender",
+        "details": "Brimstone'i kiired saavad sihtiva omaduse."
+    },
+    {
+        "items": ["Brimstone", "Technology"],
+        "name": "Brimstone + Technology",
+        "details": "Need laser-esemed muudavad koos pisarate/laserite ründemehaanikat."
+    },
+    {
+        "items": ["Mom's Knife", "Spoon Bender"],
+        "name": "Mom's Knife + Spoon Bender",
+        "details": "Nuga saab sihtiva omaduse."
+    },
+    {
+        "items": ["Technology", "Spoon Bender"],
+        "name": "Technology + Spoon Bender",
+        "details": "Laser saab sihtiva omaduse."
+    },
+    {
+        "items": ["Polyphemus", "Spoon Bender"],
+        "name": "Polyphemus + Spoon Bender",
+        "details": "Suurte pisarate puhul lisandub sihtimise eelis."
+    },
+    {
+        "items": ["Cricket's Body", "Rubber Cement"],
+        "name": "Cricket's Body + Rubber Cement",
+        "details": "Põrkuvad pisarad ja jagunemine võivad koos tekitada rohkem tabamusi."
+    },
+]
+
+
+def load_user_data():
+    """Laeb kasutaja salvestatud lemmikbuild'id failist."""
+    if not DATA_FILE.exists():
+        return []
+
+    try:
+        with DATA_FILE.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+        return data if isinstance(data, list) else []
+    except (OSError, json.JSONDecodeError):
+        return []
+
+
+def save_user_data(builds):
+    """Salvestab build'id JSON-faili."""
+    with DATA_FILE.open("w", encoding="utf-8") as file:
+        json.dump(builds, file, ensure_ascii=False, indent=4)
+
+
+def get_known_synergies(selected_items):
+    """Tagastab teadaolevad sünergiad, mille mõlemad esemed on valitud."""
+    selected = set(selected_items)
+    matches = []
+
+    for synergy in KNOWN_SYNERGIES:
+        if set(synergy["items"]).issubset(selected):
+            matches.append(synergy)
+
+    return matches
+
+
+def calculate_advisor_score(candidate, selected_items):
+    """
+    Arvutab lihtsustatud sobivusskoori.
+
+    Skoor põhineb kandidaat-eseme märksõnadel ja build'is veel
+    puudu olevatel omadustel. See ei ennusta mängu tegelikku tulemust.
+    """
+    candidate_tags = set(ITEMS[candidate]["tags"])
+    current_tags = set()
+
+    for item in selected_items:
+        current_tags.update(ITEMS[item]["tags"])
+
+    # Uued omadused annavad punkte, korduvad omadused vähem.
+    new_tags = candidate_tags - current_tags
+    shared_tags = candidate_tags & current_tags
+
+    score = len(new_tags) * 2 + len(shared_tags)
+    score += ITEMS[candidate]["quality"]
+
+    # Väike boonus teadaoleva sünergia eest.
+    for synergy in KNOWN_SYNERGIES:
+        if candidate in synergy["items"]:
+            other_item = next(
+                (item for item in synergy["items"]
+                 if item != candidate and item in selected_items),
+                None
+            )
+            if other_item:
+                score += 4
+
+    return score
+
+
+def get_recommendations(selected_items, limit=8):
+    """Koostab valitud build'i põhjal järjestatud esemesoovitused."""
+    recommendations = []
+
+    for item in ITEMS:
+        if item in selected_items:
+            continue
+
+        score = calculate_advisor_score(item, selected_items)
+        recommendations.append((item, score))
+
+    recommendations.sort(key=lambda result: result[1], reverse=True)
+    return recommendations[:limit]
+
+
+class IsaacHelperApp:
+    """The Binding of Isaaci esemete sünergia- ja soovitusprogramm."""
+
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Isaac Helper – Synergy Finder & Item Advisor")
+        self.root.geometry("1000x700")
+        self.root.minsize(850, 600)
+
+        self.builds = load_user_data()
+        self.selected_items = set()
+
+        self.create_widgets()
+        self.refresh_build_list()
+
+    def create_widgets(self):
+        """Loob programmi vahelehed ja nende sisu."""
+        title = ttk.Label(
+            self.root,
+            text="THE BINDING OF ISAAC – ITEM HELPER",
+            font=("Arial", 17, "bold")
+        )
+        title.pack(pady=(12, 4))
+
+        subtitle = ttk.Label(
+            self.root,
+            text="Rebirthi põhimängu esemete sünergiad ja soovitused"
+        )
+        subtitle.pack(pady=(0, 10))
+
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(fill="both", expand=True, padx=12, pady=8)
+
+        self.build_tab = ttk.Frame(self.notebook, padding=10)
+        self.synergy_tab = ttk.Frame(self.notebook, padding=10)
+        self.advisor_tab = ttk.Frame(self.notebook, padding=10)
+        self.saved_tab = ttk.Frame(self.notebook, padding=10)
+
+        self.notebook.add(self.build_tab, text="Minu build")
+        self.notebook.add(self.synergy_tab, text="Synergy Finder")
+        self.notebook.add(self.advisor_tab, text="Item Advisor")
+        self.notebook.add(self.saved_tab, text="Salvestatud build'id")
+
+        self.create_build_tab()
+        self.create_synergy_tab()
+        self.create_advisor_tab()
+        self.create_saved_tab()
+
+    def create_build_tab(self):
+        """Loob esemete otsimise ja praeguse build'i vaate."""
+        left = ttk.Frame(self.build_tab)
+        left.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        right = ttk.Frame(self.build_tab)
+        right.pack(side="right", fill="both", expand=True)
+
+        ttk.Label(left, text="Otsi eset:").pack(anchor="w")
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", lambda *_: self.refresh_item_list())
+        ttk.Entry(left, textvariable=self.search_var).pack(fill="x", pady=5)
+
+        self.item_list = tk.Listbox(left, selectmode=tk.SINGLE, height=20)
+        self.item_list.pack(fill="both", expand=True)
+        self.item_list.bind("<Double-Button-1>", self.add_selected_item)
+
+        ttk.Button(
+            left, text="Lisa valitud ese build'i",
+            command=self.add_selected_item
+        ).pack(fill="x", pady=6)
+
+        ttk.Label(right, text="Sinu praegune build:", font=("Arial", 11, "bold")).pack(anchor="w")
+        self.build_list = tk.Listbox(right, height=17)
+        self.build_list.pack(fill="both", expand=True, pady=5)
+
+        ttk.Button(
+            right, text="Eemalda valitud ese",
+            command=self.remove_selected_item
+        ).pack(fill="x", pady=3)
+
+        ttk.Button(
+            right, text="Tühjenda build",
+            command=self.clear_build
+        ).pack(fill="x", pady=3)
+
+        self.refresh_item_list()
+        self.refresh_build_list()
+
+    def create_synergy_tab(self):
+        """Loob teadaolevate sünergiate otsinguvaate."""
+        ttk.Label(
+            self.synergy_tab,
+            text="Sinu build'is leitud teadaolevad sünergiad",
+            font=("Arial", 12, "bold")
+        ).pack(anchor="w", pady=(0, 8))
+
+        ttk.Label(
+            self.synergy_tab,
+            text="Sünergiaid otsitakse vahelehel „Minu build” valitud esemete põhjal."
+        ).pack(anchor="w", pady=(0, 8))
+
+        ttk.Button(
+            self.synergy_tab,
+            text="Otsi sünergiaid",
+            command=self.show_synergies
+        ).pack(anchor="w", pady=5)
+
+        self.synergy_output = tk.Text(
+            self.synergy_tab, wrap="word", height=22, state="disabled"
+        )
+        self.synergy_output.pack(fill="both", expand=True, pady=8)
+
+    def create_advisor_tab(self):
+        """Loob Item Advisori soovituste vaate."""
+        ttk.Label(
+            self.advisor_tab,
+            text="Soovitused sinu praeguse build'i põhjal",
+            font=("Arial", 12, "bold")
+        ).pack(anchor="w", pady=(0, 8))
+
+        ttk.Label(
+            self.advisor_tab,
+            text="Soovitused kasutavad esemete märksõnu ja programmi enda skoori."
+        ).pack(anchor="w", pady=(0, 8))
+
+        ttk.Button(
+            self.advisor_tab,
+            text="Koosta soovitused",
+            command=self.show_recommendations
+        ).pack(anchor="w", pady=5)
+
+        self.advisor_output = tk.Text(
+            self.advisor_tab, wrap="word", height=22, state="disabled"
+        )
+        self.advisor_output.pack(fill="both", expand=True, pady=8)
+
+    def create_saved_tab(self):
+        """Loob build'ide salvestamise ja laadimise vaate."""
+        ttk.Label(
+            self.saved_tab,
+            text="Salvestatud build'id",
+            font=("Arial", 12, "bold")
+        ).pack(anchor="w", pady=(0, 8))
+
+        self.saved_list = tk.Listbox(self.saved_tab, height=15)
+        self.saved_list.pack(fill="both", expand=True, pady=5)
+
+        buttons = ttk.Frame(self.saved_tab)
+        buttons.pack(fill="x", pady=5)
+
+        ttk.Button(
+            buttons, text="Salvesta praegune build",
+            command=self.save_current_build
+        ).pack(side="left", padx=(0, 5))
+
+        ttk.Button(
+            buttons, text="Laadi valitud build",
+            command=self.load_selected_build
+        ).pack(side="left", padx=5)
+
+        ttk.Button(
+            buttons, text="Kustuta salvestus",
+            command=self.delete_saved_build
+        ).pack(side="left", padx=5)
+
+    def refresh_item_list(self):
+        """Uuendab esemete loendit otsingusõna põhjal."""
+        if not hasattr(self, "item_list"):
+            return
+
+        search = self.search_var.get().lower()
+        self.item_list.delete(0, tk.END)
+
+        for item in sorted(ITEMS):
+            if search in item.lower():
+                self.item_list.insert(tk.END, item)
+
+    def refresh_build_list(self):
+        """Uuendab praeguse build'i esemete loendit."""
+        if not hasattr(self, "build_list"):
+            return
+
+        self.build_list.delete(0, tk.END)
+        for item in sorted(self.selected_items):
+            self.build_list.insert(tk.END, item)
+
+    def add_selected_item(self, _event: tk.Event | None = None) -> None:
+        """Lisab esemete loendist valitud eseme build'i."""
+        selection = self.item_list.curselection()
+        if not selection:
+            return
+
+        item = self.item_list.get(selection[0])
+        self.selected_items.add(item)
+        self.refresh_build_list()
+
+    def remove_selected_item(self):
+        """Eemaldab build'ist valitud eseme."""
+        selection = self.build_list.curselection()
+        if not selection:
+            return
+
+        item = self.build_list.get(selection[0])
+        self.selected_items.discard(item)
+        self.refresh_build_list()
+
+    def clear_build(self):
+        """Tühjendab praeguse build'i."""
+        self.selected_items.clear()
+        self.refresh_build_list()
+
+    @staticmethod
+    def update_text(widget, content):
+        """Asendab tekstivälja sisu uue tekstiga."""
+        widget.config(state="normal")
+        widget.delete("1.0", tk.END)
+        widget.insert(tk.END, content)
+        widget.config(state="disabled")
+
+    def show_synergies(self):
+        """Kuvab praeguse build'i teadaolevad sünergiad."""
+        if len(self.selected_items) < 2:
+            result = "Vali kõigepealt vähemalt kaks eset vahelehel „Minu build”."
+        else:
+            matches = get_known_synergies(self.selected_items)
+            if not matches:
+                result = (
+                    "Andmebaasis ei leitud nende esemete vahel teadaolevat "
+                    "sünergiat.\nSee ei tähenda, et mängus sünergia puudub – "
+                    "programmi sünergiaandmestik on praegu piiratud."
+                )
+            else:
+                lines = []
+                for synergy in matches:
+                    lines.append("• " + synergy["name"])
+                    lines.append("  " + synergy["details"])
+                    lines.append("")
+                result = "\n".join(lines)
+
+        self.update_text(self.synergy_output, result)
+
+    def show_recommendations(self):
+        """Kuvab praeguse build'i põhjal soovitatud esemed."""
+        recommendations = get_recommendations(self.selected_items)
+
+        if not recommendations:
+            result = "Soovituste koostamiseks pole piisavalt andmeid."
+        else:
+            lines = [
+                "Soovitused (suurem skoor tähendab paremat sobivust programmi reeglite järgi):",
+                ""
+            ]
+            for number, (item, score) in enumerate(recommendations, start=1):
+                data = ITEMS[item]
+                lines.append(f"{number}. {item}  – skoor: {score}")
+                lines.append(f"   Tüüp: {data['type']} | Kvaliteet: {data['quality']}/4")
+                lines.append(f"   {data['description']}")
+                lines.append("")
+
+            lines.append(
+                "NB! Skoor on lihtsustatud hinnang. See ei arvesta kõiki "
+                "mängumehaanikaid ega tähenda, et soovitatud ese oleks "
+                "alati parim valik."
+            )
+            result = "\n".join(lines)
+
+        self.update_text(self.advisor_output, result)
+
+    def refresh_saved_list(self):
+        """Uuendab salvestatud build'ide loendit."""
+        self.saved_list.delete(0, tk.END)
+        for build in self.builds:
+            self.saved_list.insert(tk.END, build["name"])
+
+    def save_current_build(self):
+        """Küsib build'ile nime ja salvestab selle."""
+        if not self.selected_items:
+            messagebox.showinfo("Salvestamine", "Sinu build on tühi.")
+            return
+
+        name_window = tk.Toplevel(self.root)
+        name_window.title("Salvesta build")
+        name_window.geometry("300x120")
+        name_window.transient(self.root)
+        name_window.grab_set()
+
+        ttk.Label(name_window, text="Sisesta build'i nimi:").pack(pady=(12, 4))
+        name_var = tk.StringVar()
+        entry = ttk.Entry(name_window, textvariable=name_var)
+        entry.pack(fill="x", padx=12)
+        entry.focus_set()
+
+        def save():
+            """Salvestab sisestatud nimega build'i."""
+            name = name_var.get().strip()
+            if not name:
+                messagebox.showwarning("Puuduv nimi", "Sisesta build'ile nimi.")
+                return
+
+            self.builds.append({
+                "name": name,
+                "items": sorted(self.selected_items)
+            })
+            save_user_data(self.builds)
+            self.refresh_saved_list()
+            name_window.destroy()
+
+        ttk.Button(name_window, text="Salvesta", command=save).pack(pady=10)
+
+    def load_selected_build(self):
+        """Laeb loendist valitud build'i."""
+        selection = self.saved_list.curselection()
+        if not selection:
+            messagebox.showinfo("Laadimine", "Vali kõigepealt build.")
+            return
+
+        build = self.builds[selection[0]]
+        self.selected_items = {
+            item for item in build["items"] if item in ITEMS
+        }
+        self.refresh_build_list()
+        self.notebook.select(self.build_tab)
+
+    def delete_saved_build(self):
+        """Kustutab valitud salvestatud build'i."""
+        selection = self.saved_list.curselection()
+        if not selection:
+            messagebox.showinfo("Kustutamine", "Vali kõigepealt build.")
+            return
+
+        index = selection[0]
+        name = self.builds[index]["name"]
+
+        if messagebox.askyesno("Kustuta build", f"Kas kustutada „{name}”?"):
+            del self.builds[index]
+            save_user_data(self.builds)
+            self.refresh_saved_list()
+
+
+def main():
+    """Käivitab programmi."""
+    root = tk.Tk()
+    app = IsaacHelperApp(root)
+    app.refresh_saved_list()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
